@@ -111,6 +111,26 @@ INSERT INTO users VALUES (4, '2014-08-03', '2014-08-10');
 INSERT INTO users VALUES (5, '2014-08-10', NULL);
 
 --ANSWER
+with a as(
+  select joined_on date
+  ,1 j
+  ,0 l
+  from users 
+  union all
+  select left_on date
+  ,0 j
+  ,1 l
+  from users
+  where left_on is not null
+)
+select date
+,sum(j) joined_count
+,sum(l) left_count
+from a
+group by date;
+
+
+
 
 /*
 https://qiita.com/jnchito/items/7d5d7e829690ea3c4d6f
@@ -168,4 +188,21 @@ CREATE TABLE sysdate_dummy (
 
 INSERT INTO sysdate_dummy VALUES (1,'2014/01/24');
 
-
+--ANSWER
+with a as(
+  select events.id event_id
+  ,name
+  ,schedules.id schedule_id
+  ,due_date
+  from events left join schedules
+  on events.id = event_id
+  where due_date >= (SELECT MAX(sysdate) FROM sysdate_dummy)
+  or due_date is null
+)
+select event_id
+,name
+,schedule_id
+,due_date
+from a
+order by due_date,event_id
+;
